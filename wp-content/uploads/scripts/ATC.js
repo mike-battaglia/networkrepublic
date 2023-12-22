@@ -1,17 +1,22 @@
 console.log("Called: Add To Cart Snippet")
 
-console.log('Debug Stock');
-var stockHTML = document.querySelector("p.stock").innerHTML;
-console.log('')
-console.log('//Debug Stock')
-
 
 // Create a function called "revealAddToCartButton" that will reveal the add to cart button when the Condition selected is New and the Quantity selected is equal to or less than the quantity in stock.   
 
 function revealAddToCartButton() {
-    var condition = document.getElementById("condition").value;
+	//console.log('🟡');
+	var condition = document.getElementById("condition").value;
     var quantity = document.querySelector('input[name="quantity"]').value;
-    var stockHTML = document.querySelector("p.stock").innerHTML;
+	var stockHTML = '';
+    try {
+		var stockHTML = document.querySelector("p.stock").innerHTML;
+		//console.log('🟢');
+		//console.log(stockHTML);
+	} catch (error) {
+		//console.log('🔴');
+		var stockHTML = 'Stock not fetched.';
+		//console.log(stockHTML);
+	}
     var addToCartButton = document.querySelector("button.single_add_to_cart_button");
     // if stockHTML contains a number, then stock = that number, otherwise stock = 0, be sure to include the entire number and not just the first digit
     var stock = stockHTML.match(/\d+/) ? stockHTML.match(/\d+/)[0] : 0;
