@@ -1,9 +1,8 @@
 <?
-
 // Hook into WordPress to add query params on page load
 add_action('template_redirect', 'add_query_params_to_browse_page');
-// Add a canonical tag to the head section of the page
-add_action('wp_head', 'add_canonical_tag_to_browse_page');
+// Hook into Rank Math's canonical URL filter
+add_filter('rank_math/frontend/canonical', 'modify_rank_math_canonical_url');
 
 function add_query_params_to_browse_page() {
     // Ensure this runs only on single 'browse' post type pages, not in admin or during AJAX requests
@@ -58,7 +57,7 @@ function add_query_params_to_browse_page() {
     }
 }
 
-function add_canonical_tag_to_browse_page() {
+function modify_rank_math_canonical_url($canonical) {
     // Ensure this runs only on single 'browse' post type pages, not in admin or during AJAX requests
     if (is_singular('browse') && !is_admin() && !wp_doing_ajax() && !isset($_GET['elementor-preview'])) {
         global $post;
@@ -66,7 +65,10 @@ function add_canonical_tag_to_browse_page() {
         // Retrieve the current URL, including all query parameters
         $canonical_url = add_query_arg($_GET, get_permalink($post->ID));
         
-        // Output the canonical tag to indicate the canonical version of the URL
-        echo '<link rel="canonical" href="' . esc_url($canonical_url) . '" />';
+        // Return your custom canonical URL
+        return $canonical_url;
     }
+    
+    // For all other cases, return the default canonical URL
+    return $canonical;
 }
