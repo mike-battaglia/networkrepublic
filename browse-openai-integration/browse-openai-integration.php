@@ -231,13 +231,12 @@ function boai_generate_faq() {
 function boai_send_openai_request($prompt, $api_key) {
     $model = get_option('boai_model', 'gpt-4'); // Default to 'gpt-4' if not set
     $max_tokens = intval(get_option('boai_max_tokens', '500')); // Default to 500 if not set
-	$boai_faq_role = get_option('boai_faq_role', 'You are an AI assistant created by OpenAI.'); 
 
     $endpoint = 'https://api.openai.com/v1/chat/completions';
     $data = array(
         'model' => $model,
         'messages' => array(
-            array('role' => 'system', 'content' => $boai_faq_role),
+            array('role' => 'system', 'content' => 'You are ChatGPT, a large language model trained by OpenAI.'),
             array('role' => 'user', 'content' => $prompt)
         ),
         'max_tokens' => $max_tokens,
@@ -254,15 +253,23 @@ function boai_send_openai_request($prompt, $api_key) {
     );
 
     $response = wp_remote_post($endpoint, $args);
+
     if (is_wp_error($response)) {
         return $response;
     } else {
+        $status_code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $result = json_decode($body, true);
-        if (isset($result['choices'][0]['message']['content'])) {
+
+        if ($status_code === 200 && isset($result['choices'][0]['message']['content'])) {
             return trim($result['choices'][0]['message']['content']);
         } else {
-            return new WP_Error('openai_error', 'Failed to retrieve response from OpenAI API.');
+            // Extract OpenAI's error message if available
+            $error_message = 'Failed to retrieve response from OpenAI API.';
+            if (isset($result['error']['message'])) {
+                $error_message = 'OpenAI API Error: ' . $result['error']['message'];
+            }
+            return new WP_Error('openai_error', $error_message);
         }
     }
 }
