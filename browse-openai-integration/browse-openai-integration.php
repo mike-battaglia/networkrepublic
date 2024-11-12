@@ -231,16 +231,17 @@ function boai_generate_faq() {
 function boai_send_openai_request($prompt, $api_key) {
     $model = get_option('boai_model', 'gpt-4'); // Default to 'gpt-4' if not set
     $max_tokens = intval(get_option('boai_max_tokens', '500')); // Default to 500 if not set
+	$boai_faq_role = get_option('boai_faq_role', 'You are an AI assistant created by OpenAI.'); 
 
     $endpoint = 'https://api.openai.com/v1/chat/completions';
     $data = array(
         'model' => $model,
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are ChatGPT, a large language model trained by OpenAI.'),
+            array('role' => 'system', 'content' => $boai_faq_role),
             array('role' => 'user', 'content' => $prompt)
         ),
         'max_tokens' => $max_tokens,
-        'temperature' => 0.7,
+        'temperature' => 0.4,
     );
 
     $args = array(
